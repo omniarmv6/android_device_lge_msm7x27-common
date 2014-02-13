@@ -30,23 +30,6 @@ on init
     chmod 0666 /dev/msm_camera/frame0
     chmod 0666 /dev/msm_camera/pic0
 
-    # Define the memory thresholds at which the above process classes will
-    # be killed.  These numbers are in pages (4k).
-    setprop ro.FOREGROUND_APP_MEM 1536
-    setprop ro.VISIBLE_APP_MEM 2048
-    setprop ro.SECONDARY_SERVER_MEM 4096
-    setprop ro.BACKUP_APP_MEM 4096
-    setprop ro.HOME_APP_MEM 4096
-    setprop ro.HIDDEN_APP_MEM 5120
-    setprop ro.CONTENT_PROVIDER_MEM 5632
-    setprop ro.EMPTY_APP_MEM 6144
-
-    # Import Froyo LMK settings due to its less aggressive nature
-    write /sys/module/lowmemorykiller/parameters/minfree 1536,2048,4096,5120,5632,6144
-    # Enable low memory killer to check file pages
-    write /sys/module/lowmemorykiller/parameters/minfile 0,0,0,5120,5632,6144
-    write /sys/module/lowmemorykiller/parameters/check_filepages 1
-
 
 #################
 ## 3: EARLY-FS ##
@@ -213,15 +196,6 @@ on boot
 
     chmod 0444 /sys/devices/platform/msm_hsusb/gadget/usb_state
 
-    #To allow interfaces to get v6 address when tethering is enabled
-    write /proc/sys/net/ipv6/conf/rmnet0/accept_ra 2
-    write /proc/sys/net/ipv6/conf/rmnet1/accept_ra 2
-    write /proc/sys/net/ipv6/conf/rmnet2/accept_ra 2
-
-    write /proc/sys/net/ipv6/conf/rmnet_usb0/accept_ra 2
-    write /proc/sys/net/ipv6/conf/rmnet_usb1/accept_ra 2
-    write /proc/sys/net/ipv6/conf/rmnet_usb2/accept_ra 2
-
     # To prevent out of order acknowledgements from making
     # connection tracking to treat them as not belonging to
     # the connection they belong to.
@@ -229,6 +203,18 @@ on boot
     # connections on high-throughput links get dropped when
     # an ack packet comes out of order
     write /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal 1
+
+
+########################
+## 10: BOOT COMPLETED ##
+########################
+
+on property:sys.boot_completed=1
+    # Override Kernel Samepage Merging (KSM) values
+    write /sys/kernel/mm/ksm/sleep_millisecs 4000
+    write /sys/kernel/mm/ksm/pages_to_scan 256
+
+
 
 #############################################################################
 ### S E R V I C E S                                                        ##
@@ -238,20 +224,6 @@ service qmuxd /system/bin/qmuxd
     class core
     user radio
     group radio audio inet bluetooth gps qcom_diag
-
-# configure BT on boot for BlueZ support
-service config_bluetooth /system/bin/sh /system/bin/init.qcom.bt.sh "onboot"
-    class main
-    user root
-    oneshot
-
-# HCI attach service
-service hciattach /system/bin/sh /system/bin/init.qcom.bt.sh
-    class main
-#   user bluetooth
-    group bluetooth net_bt_admin net_bt_stack
-    disabled
-    oneshot
 
 on property:service.brcm.bt.mac=*
     exec /system/bin/hwaddrs
@@ -275,26 +247,6 @@ on property:init.svc.wpa_supplicant=stopped
 
 service iprenew_wlan0 /system/bin/dhcpcd -n
     class main
-    disabled
-    oneshot
-
-service dhcpcd_bnep0 /system/bin/dhcpcd -BKLG
-    disabled
-    oneshot
-
-service dhcpcd_bnep1 /system/bin/dhcpcd -BKLG
-    disabled
-    oneshot
-
-service dhcpcd_bnep2 /system/bin/dhcpcd -BKLG
-    disabled
-    oneshot
-
-service dhcpcd_bnep3 /system/bin/dhcpcd -BKLG
-    disabled
-    oneshot
-
-service dhcpcd_bnep4 /system/bin/dhcpcd -BKLG
     disabled
     oneshot
 

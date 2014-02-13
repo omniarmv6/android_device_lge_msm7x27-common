@@ -1,45 +1,6 @@
-## BlueZ support
-## Note: needs to be defined here in order to satisfy inheritance issues.
-## If disabled, Bluedroid will be used.
-#BOARD_HAVE_BLUETOOTH_BLUEZ := true
-
-ifdef BOARD_HAVE_BLUETOOTH_BLUEZ
-# BlueZ: binaries
-PRODUCT_PACKAGES += \
-    bluetoothd \
-    brcm_patchram_plus \
-    libbluetoothd \
-    hcitool \
-    hciconfig \
-    hciattach
-
-# BlueZ: configs
-PRODUCT_COPY_FILES += \
-    system/bluetooth/data/audio.conf:system/etc/bluetooth/audio.conf \
-    system/bluetooth/data/auto_pairing.conf:system/etc/bluetooth/auto_pairing.conf \
-    system/bluetooth/data/blacklist.conf:system/etc/bluetooth/blacklist.conf \
-    system/bluetooth/data/input.conf:system/etc/bluetooth/input.conf \
-    system/bluetooth/data/main.le.conf:system/etc/bluetooth/main.conf \
-    system/bluetooth/data/network.conf:system/etc/bluetooth/network.conf
-
-# BlueZ: javax.btobex is required by Bluetooth_msm
-PRODUCT_PACKAGES += \
-    javax.btobex
-
-# BlueZ: rc
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/bluetooth/init.qcom.bluez.rc:root/init.qcom.bluetooth.rc
-
-else
-
 # Bluedroid: rc
 PRODUCT_COPY_FILES += \
      $(LOCAL_PATH)/bluetooth/init.qcom.bluedroid.rc:root/init.qcom.bluetooth.rc
-
-endif #BOARD_HAVE_BLUETOOTH_BLUEZ
-
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/bluetooth/init.qcom.bt.sh:system/bin/init.qcom.bt.sh
 
 PRODUCT_PACKAGES += \
     hwaddrs
@@ -82,13 +43,8 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.telephony.call_ring.multiple=false
 
 PRODUCT_PROPERTY_OVERRIDES += \
-    com.qc.hdmi_out=false \
-    debug.sf.hw=1 \
-    debug.composition.type=mdp \
-    debug.gr.numframebuffers=3 \
-    persist.sys.purgeable_assets=1 \
-    persist.service.adb.enable=1
-    
+    debug.gr.numframebuffers=3
+
 # Ramdisk
 PRODUCT_PACKAGES += \
     initlogo.rle \
@@ -109,20 +65,21 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     com.android.future.usb.accessory \
     lights.msm7x27 \
-    lgapversion
-    
+    lgapversion \
+    libnetcmdiface
+
 # GPS
 PRODUCT_PACKAGES += \
     gps.default \
     librpc
-    
+
 # Build sim toolkit
 PRODUCT_PACKAGES += \
     Stk
-    
+
 # Camera
 PRODUCT_PACKAGES += \
-    camera.msm7x27 \
+    camera.msm7x27
 
 # Filesystem management tools
 PRODUCT_PACKAGES += \
@@ -135,7 +92,8 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 BOARD_SEPOLICY_DIRS += device/lge/msm7x27-common/sepolicy
 BOARD_SEPOLICY_UNION += \
-    file_contexts
+    file_contexts \
+    genfs_contexts
 
 # Offmode charging
 #PRODUCT_PACKAGES += \
@@ -146,7 +104,8 @@ BOARD_SEPOLICY_UNION += \
 ADDITIONAL_DEFAULT_PROPERTIES += \
     ro.debuggable=1 \
     ro.secure=0 \
-    ro.allow.mock.location=0
+    ro.allow.mock.location=0 \
+    persist.service.adb.enable=1
 
 # set default USB configuration
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
